@@ -148,11 +148,13 @@ class 报价监控:
     '报价': 'bottom_price',
     # ... 其他列名替换规则
 }                       
-                        df_renamed =self.bd_data.loc[df2.index][['编码','报价']].rename(columns=column_rename_mapping)
+                        df_renamed =self.bd_data.loc[df2.index][['编码','报价']].rename(columns=column_rename_mapping).head(20)
                         print(file_name)
                         if not df_renamed.empty:
                             print('符合改价')
                             print(df_renamed)
+                            df_renamed['报价']= df_renamed['报价'].astype(float).round(2)
+                            
                             self.putTlj(df_renamed.to_dict('records'))
                             print('改价完成')
                         self.bd_data.to_csv(self.pz_data.get('后端大表','库存&成本-后台产品库(5).csv'),index=False)
@@ -163,10 +165,11 @@ class 报价监控:
                 #print(e)
             time.sleep(10)
     def run(self):
-
+        print('开始下载历史文件')
         thread=threading.Thread(target=self.get_bg_xlsx, args=())
         thread.start()
-      
+        print('开始价格监控')
+        self.set_price()
     
     def putTlj(self,d):
         
@@ -176,6 +179,7 @@ class 报价监控:
 "appsecret": self.pz_data.get('appsecret','bbbbbbbb'),
 "goods":d
 }
+        print(d)
 
         res=sx.post_request(url=url,json_=data)
         print(res.json())
@@ -211,3 +215,4 @@ if __name__ == '__main__':
 # 37  1759fb9a-1cd8-43da-93ac-aa0d4cf820cf       2755.10
 # 38  45adeeb1-c052-4b2d-a81c-b9a3ad859005       7493.10
 # {'data': {'msg': '同步成功'}, 'returnMsg': 'success', 'isSuccess': True, 'log_id': '82071'}
+# 8   c5ab71cc-eeee-4e26-b7b2-34c61db01933        942.59
